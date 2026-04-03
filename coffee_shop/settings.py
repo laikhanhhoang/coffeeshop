@@ -30,7 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+csrf_origins = os.getenv('AZURE_CSRF_TRUSTED_ORIGINS', '')
 CSRF_TRUSTED_ORIGINS = [x.strip() for x in csrf_origins.split(',') if x]
 
 
@@ -86,14 +86,16 @@ WSGI_APPLICATION = 'coffee_shop.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': os.environ.get('AZURE_POSTGRESQL_DATABASE'),
+        'HOST': os.environ.get('AZURE_POSTGRESQL_HOST'),
+        'USER': os.environ.get('AZURE_POSTGRESQL_USERNAME'),
+        'PASSWORD': os.environ.get('AZURE_POSTGRESQL_PASSWORD'),
+        'PORT': os.environ.get('AZURE_POSTGRESQL_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require'
+        }
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
