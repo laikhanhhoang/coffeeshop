@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4 border-bottom">
+    <h1 class="h2">Báo cáo Doanh thu</h1>
+</div>
+
+<div class="row pt-4">
+    <div class="col-md-6 offset-md-3">
+        <div class="card shadow border-0 text-center">
+            <div class="card-header bg-primary bg-gradient text-white py-3 fw-bold tracking-wide text-uppercase">
+                <h5 class="mb-0">Hôm nay - {{ date|date:"d/m/Y" }}</h5>
+            </div>
+            <div class="card-body p-5">
+                <div class="mb-5">
+                    <p class="text-muted fw-bold text-uppercase ls-wide mb-1">Tổng Số Đơn Hàng Mới</p>
+                    <h2 class="display-3 fw-bolder text-dark mb-0">{{ total_orders }} <span class="fs-5 text-muted fw-normal">Đơn</span></h2>
+                </div>
+                
+                <div class="bg-light rounded p-4">
+                    <p class="text-muted fw-bold text-uppercase ls-wide mb-1">Tổng Mức Doanh Thu</p>
+                    <h2 class="display-4 fw-bolder text-success mb-0">{{ total_revenue|floatformat:"0" }} <span class="fs-4 text-secondary">VNĐ</span></h2>
+                </div>
+                
+                <hr class="mt-5 mb-4 text-muted">
+                <small class="text-muted">Dữ liệu được cập nhật dựa trên tổng số hóa đơn đã xuất trong ngày hôm nay.</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

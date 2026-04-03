@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">Danh sách đơn hàng hôm nay</h1>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+        + Thêm đơn hàng mới
+    </button>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Mã đơn hàng</th>
+                        <th>Thời gian tạo</th>
+                        <th>Chi tiết món</th>
+                        <th class="text-end pe-3">Tổng tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders_today %}
+                    <tr>
+                        <td class="ps-3 fw-bold">#{{ order.id }}</td>
+                        <td>{{ order.created_at|date:"H:i - d/m/Y" }}</td>
+                        <td>
+                            <ul class="list-unstyled mb-0">
+                            {% for item in order.orderitem_set.all %}
+                                <li>
+                                    <span class="badge bg-secondary rounded-pill me-1">{{ item.quantity }}x</span> 
+                                    {{ item.product.name }}
+                                </li>
+                            {% empty %}
+                                <li class="text-muted">Trống</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="text-end pe-3 fw-bold text-success">
+                            {{ order.total_price|floatformat:"0" }} VNĐ
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center py-4 text-muted">Chưa có đơn hàng nào phát sinh hôm nay.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addOrderModal" tabindex="-1" aria-labelledby="addOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'add_order' %}" class="modal-content">
+      {% csrf_token %}
+      <div class="modal-header">
+        <h5 class="modal-title" id="addOrderModalLabel">Tạo đơn hàng nhanh</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+    <div class="modal-body">
+        <div id="order-items">
+            <div class="row g-2 align-items-end order-item mb-3">
+                <div class="col-7">
+                    <label class="form-label fw-bold">Chọn sản phẩm</label>
+                    <select class="form-select" name="product_id[]" required>
+                        <option value="">-- Mời chọn mặt hàng --</option>
+                        {% for product in products %}
+                            <option value="{{ product.id }}">
+                                {{ product.name }} ({{ product.price|floatformat:"0" }} đ)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-3">
+                    <label class="form-label fw-bold">Số lượng</label>
+                    <input type="number" class="form-control" name="quantity[]" min="1" value="1" required>
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-outline-danger w-100 remove-item">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-primary btn-sm" id="add-item-btn">
+            + Thêm món
+        </button>
+    </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-primary">Xác nhận tạo đơn</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const addItemBtn = document.getElementById("add-item-btn");
+    const orderItemsContainer = document.getElementById("order-items");
+
+    addItemBtn.addEventListener("click", function () {
+        const firstItem = document.querySelector(".order-item");
+        const newItem = firstItem.cloneNode(true);
+
+        // Reset giá trị
+        newItem.querySelector('select').value = "";
+        newItem.querySelector('input').value = 1;
+
+        orderItemsContainer.appendChild(newItem);
+    });
+
+    orderItemsContainer.addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-item")) {
+            const items = document.querySelectorAll(".order-item");
+
+            // Giữ lại ít nhất 1 dòng
+            if (items.length > 1) {
+                e.target.closest(".order-item").remove();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

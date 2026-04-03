@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4 border-bottom">
+    <h1 class="h2">Tổng hợp thông tin (Dashboard)</h1>
+</div>
+
+<div class="row pt-2 pb-5">
+    <!-- Biểu đồ 1 -->
+    <div class="col-12 col-xl-6 mb-4 mb-xl-0">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light fw-bold text-dark py-3">
+                <h5 class="mb-0 fs-6">So Sánh Doanh Thu Các Ngày Trong Tuần (Tuần Này)</h5>
+            </div>
+            <div class="card-body align-items-center d-flex p-4">
+                <canvas id="weeklyChart" style="max-height: 350px;"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Biểu đồ 2 -->
+    <div class="col-12 col-xl-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light fw-bold text-dark py-3">
+                <h5 class="mb-0 fs-6">Biến Động Doanh Thu Các Ngày Trong Tháng Này (Line Chart)</h5>
+            </div>
+            <div class="card-body align-items-center d-flex p-4">
+                <canvas id="monthlyChart" style="max-height: 350px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Nén dữ liệu JSON vào thẻ script ẩn để tránh IDE linter báo lỗi syntax JavaScript -->
+{{ weekly_labels|safe|json_script:"weeklyLabelsData" }}
+{{ weekly_revenues|safe|json_script:"weeklyRevenuesData" }}
+{{ monthly_labels|safe|json_script:"monthlyLabelsData" }}
+{{ monthly_revenues|safe|json_script:"monthlyRevenuesData" }}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // == NHẬN DỮ LIỆU (Đọc từ thẻ script ẩn ở trên) ==
+        // Lưu ý: JSON.parse hai lần vì từ View truyền ra là mảng đã dump thành string, 
+        // json_script lại dump thêm một lần nữa.
+        const weeklyLabels = JSON.parse(JSON.parse(document.getElementById('weeklyLabelsData').textContent));
+        const weeklyRevenues = JSON.parse(JSON.parse(document.getElementById('weeklyRevenuesData').textContent));
+        
+        const monthlyLabels = JSON.parse(JSON.parse(document.getElementById('monthlyLabelsData').textContent));
+        const monthlyRevenues = JSON.parse(JSON.parse(document.getElementById('monthlyRevenuesData').textContent));
+
+        // == 1. BIỂU ĐỒ BAR CHART (TUẦN NÀY) ==
+        const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(ctxWeekly, {
+            type: 'bar',
+            data: {
+                labels: weeklyLabels,
+                datasets: [{
+                    label: 'Tổng Doanh thu (VNĐ)',
+                    data: weeklyRevenues,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { beginAtZero: true, display: true, title: {display: true, text: 'VNĐ'} }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+
+        // == 2. BIỂU ĐỒ LINE CHART (THÁNG NÀY) ==
+        const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(ctxMonthly, {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Biến động Doanh thu (VNĐ)',
+                    data: monthlyRevenues,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { beginAtZero: true, suggestedMin: 0 }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
