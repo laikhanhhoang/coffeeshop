@@ -16,11 +16,6 @@ while true; do
   sleep 60
 done &
 
-# Chạy Task 3 phút
-while true; do
-  $PYTHON_BIN $MANAGE_PY seed_orders
-  sleep 180
-done &
 
 # Chạy Web chính
 $PYTHON_BIN -m gunicorn --bind=0.0.0.0 --timeout 600 coffee_shop.wsgi
