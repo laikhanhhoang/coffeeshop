@@ -9,7 +9,7 @@ def get_conn():
         password=os.getenv("AZURE_POSTGRESQL_PASSWORD"),
         host=os.getenv("AZURE_POSTGRESQL_HOST"),
         port=5432,
-        sslmode=os.getenv("AZURE_POSTGRESQL_SSL", "require"),
+        sslmode="require",
     )
 
 
